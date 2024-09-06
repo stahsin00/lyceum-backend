@@ -2,33 +2,88 @@ import random
 import sympy as sp
 from fractions import Fraction
 
-# TODO: formatting
-def generate_antiderivative_question():
+# 4.8
+def generate_polynomial():
     x = sp.symbols('x')
 
     degree = random.randint(1, 5)
     coefficients = [random.randint(-5, 5) for _ in range(degree + 1)]
-    polynomial = sum(c * x**i for i, c in enumerate(coefficients))
 
-    question_text = f"Find the antiderivative of: {sp.latex(polynomial)}. Use C for the constant of the antiderivative."
-    antiderivative = sp.integrate(polynomial, x)
+    return sum(c * x**i for i, c in enumerate(coefficients))
 
-    return question_text, antiderivative
 
-def generate_antiderivative_question_2():
+def generate_fractional_polynomial():
     x = sp.symbols('x')
+    coefficient = Fraction(random.randint(-9, 9), random.randint(1, 9))
+    exponent = Fraction(random.randint(1, 5), random.randint(1, 5))
+    return coefficient * x**exponent
 
-    terms = random.randint(2, 3)
-    polynomial = 0
-    for _ in range(terms):
-        coefficient = Fraction(random.randint(-9, 9), random.randint(1, 9))
-        exponent = Fraction(random.randint(1, 7), 4)
-        polynomial += coefficient * x**exponent
+
+def generate_root_polynomial():
+    x = sp.symbols('x')
+    root_degree = random.choice([2, 3, 4])
+    return x**(1 / root_degree)
+
+
+def generate_linear_product():
+    x = sp.symbols('x')
+    a = random.randint(1, 5)
+    b = random.randint(-5, 5)
+    return x * (a * x + b)
+
+
+def generate_square_of_linear():
+    x = sp.symbols('x')
+    a = random.randint(-5, 5)
+    return (x + a)**2
+
+
+def generate_exponential():
+    x = sp.symbols('x')
+    base = random.choice([sp.E, random.randint(2, 5)])
+    return base**x
+
+
+def generate_reciprocal():
+    x = sp.symbols('x')
+    coefficient = random.randint(-5, 5)
+    return coefficient / x
+
+
+def generate_polynomial_fraction():
+    x = sp.symbols('x')
+    numerator = generate_polynomial()
+    denominator = random.choice([x, x + random.randint(-5, 5)])
+    return numerator / denominator
+
+
+def generate_trigonometric():
+    x = sp.symbols('x')
+    trig_functions = [sp.sin(x), sp.cos(x), sp.sec(x)**2]
+    return random.randint(-5, 5) * random.choice(trig_functions)
+
+
+def generate_antiderivative_question():
+    question_generators = [
+        generate_polynomial,
+        generate_fractional_polynomial,
+        generate_root_polynomial,
+        generate_linear_product,
+        generate_square_of_linear,
+        generate_exponential,
+        generate_reciprocal,
+        generate_polynomial_fraction,
+        generate_trigonometric
+    ]
+    
+    question_func = random.choice(question_generators)
+    polynomial = question_func()
 
     question_text = f"Find the antiderivative of: {sp.latex(polynomial)}. Use C for the constant of the antiderivative."
-    antiderivative = sp.integrate(polynomial, x)
+    antiderivative = sp.integrate(polynomial, sp.symbols('x'))
 
     return question_text, antiderivative
+
 
 def check_answer(user_input, correct_answer):
     x, C = sp.symbols('x C')
@@ -43,9 +98,11 @@ def check_answer(user_input, correct_answer):
     except (sp.SympifyError, ValueError):
         return False
 
+
+# main
 if __name__ == "__main__":
     while True:
-        question, correct_answer = generate_antiderivative_question_2()
+        question, correct_answer = generate_antiderivative_question()
         
         print("Question:", question)
         
