@@ -63,6 +63,11 @@ def generate_trigonometric():
     return random.randint(-5, 5) * random.choice(trig_functions)
 
 
+def generate_reverse_trigonometric():
+    x = sp.symbols('x')
+    return random.randint(-5, 5) / (1 + x**2)
+
+
 def generate_antiderivative_question():
     question_generators = [
         generate_polynomial,
@@ -73,14 +78,37 @@ def generate_antiderivative_question():
         generate_exponential,
         generate_reciprocal,
         generate_polynomial_fraction,
-        generate_trigonometric
+        generate_trigonometric,
+        generate_reverse_trigonometric
     ]
     
     question_func = random.choice(question_generators)
-    polynomial = question_func()
+    derivative = question_func()
 
-    question_text = f"Find the antiderivative of: {sp.latex(polynomial)}. Use C for the constant of the antiderivative."
-    antiderivative = sp.integrate(polynomial, sp.symbols('x'))
+    question_text = f"Find the antiderivative of: {sp.latex(derivative)}. Use C for the constant of the antiderivative."
+    antiderivative = sp.integrate(derivative, sp.symbols('x'))
+
+    return question_text, antiderivative
+
+def generate_antiderivative_question_with_constant():
+    question_generators = [
+        generate_polynomial,
+        generate_root_polynomial,
+        generate_linear_product,
+        generate_square_of_linear,
+        generate_exponential,
+        generate_trigonometric,
+        generate_reverse_trigonometric
+    ]
+    
+    question_func = random.choice(question_generators)
+    c_value = random.randint(-5, 5)
+    derivative = question_func()
+
+    antiderivative = sp.integrate(derivative, sp.symbols('x')) + c_value
+    f_0_value = antiderivative.subs(sp.symbols('x'), 0)
+
+    question_text = f"Find the antiderivative of: {sp.latex(derivative)}. f(0) = {f_0_value}."
 
     return question_text, antiderivative
 
@@ -93,6 +121,19 @@ def check_answer(user_input, correct_answer):
         
         diff = sp.simplify(correct_expr - user_expr)
         is_correct = diff == 0 or diff.diff(x) == 0  # TODO: require C in the user expression
+
+        return is_correct
+    except (sp.SympifyError, ValueError):
+        return False
+    
+
+def check_answer_with_constant(user_input, correct_answer):
+    x = sp.symbols('x')
+    try:
+        user_expr = sp.sympify(user_input)
+
+        diff = sp.simplify(correct_answer - user_expr)
+        is_correct = diff == 0
 
         return is_correct
     except (sp.SympifyError, ValueError):
