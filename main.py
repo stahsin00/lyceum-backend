@@ -2,6 +2,17 @@ import random
 import sympy as sp
 from fractions import Fraction
 
+# matrix multiplication
+def generate_matrix_multiplication():
+    A = sp.Matrix([[random.randint(-5, 10) for _ in range(2)] for _ in range(2)])
+    B = sp.Matrix([[random.randint(-5, 10) for _ in range(2)] for _ in range(2)])
+
+    product = A * B
+
+    question_text = f"Multiply the matrices: A = {A} and B = {B}. Find the product A * B."
+    
+    return question_text, product
+
 # 4.8
 def generate_polynomial():
     x = sp.symbols('x')
@@ -138,12 +149,23 @@ def check_answer_with_constant(user_input, correct_answer):
         return is_correct
     except (sp.SympifyError, ValueError):
         return False
+    
+
+def check_matrix_multiplication_answer(user_input, correct_answer):
+    try:
+        user_matrix = sp.Matrix(eval(user_input))
+        
+        is_correct = user_matrix.equals(correct_answer)
+        
+        return is_correct
+    except (SyntaxError, ValueError, TypeError, sp.ShapeError):
+        return False
 
 
 # main
 if __name__ == "__main__":
     while True:
-        question, correct_answer = generate_antiderivative_question()
+        question, correct_answer = generate_matrix_multiplication()
         
         print("Question:", question)
         
@@ -153,7 +175,7 @@ if __name__ == "__main__":
             print("Exiting the program. Goodbye!")
             break
 
-        if check_answer(user_input, correct_answer):
+        if check_matrix_multiplication_answer(user_input, correct_answer):
             print("Correct!")
         else:
-            print(f"Incorrect. The correct answer is: {correct_answer} + C")
+            print(f"Incorrect. The correct answer is: {correct_answer}")
